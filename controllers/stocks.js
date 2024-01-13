@@ -1,4 +1,5 @@
 const { db } = require("../db/firebase");
+const {scrapeInfo} = require("./puppeteer");
 
 
 const addFloorsheet = async(req, res)=>{
@@ -39,4 +40,19 @@ const getFLoorsheet = async(req, res)=>{
     }
 }
 
-module.exports = {addFloorsheet, getFLoorsheet}
+const getFundamenatals=async(req,res)=>{
+    try{
+    const {code} = req.params
+    let data = await scrapeInfo(code);
+    if(data){
+        console.log("=======================\n" , data)
+        res.status(200).json({msg:"success", fundamentals: data}) ;
+    }else{
+        res.status(404).json({msg: "not found"})
+    }
+    }catch(error){
+        res.status(500).json(error)
+    }
+}
+
+module.exports = {addFloorsheet, getFLoorsheet, getFundamenatals}
