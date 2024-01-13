@@ -39,6 +39,21 @@ const getFLoorsheet = async(req, res)=>{
         
     }
 }
+const getFuture = async(req, res)=>{
+    try {
+        const {code} = req.params
+        const  stock = await db.collection("future").where("code", "==", code).get()
+    if(stock.docs[0]){
+        res.status(200).json({msg:"success", data:stock.docs[0].data()})
+    }
+    else{
+        res.json({msg:"failure"})
+    }
+
+    } catch (error) {
+        
+    }
+}
 
 const getFundamentals=async(req,res)=>{
     try{
@@ -54,6 +69,7 @@ const getFundamentals=async(req,res)=>{
         res.status(500).json(error)
     }
 }
+
 
 const addFundamentals = async (req, res) => {
   try {
@@ -96,4 +112,25 @@ const getAllFundamentals = async (req, res) => {
   }
 };
 
-module.exports = {addFloorsheet, getFLoorsheet, getFundamentals, addFundamentals, getAllFundamentals}
+
+const addFuture = async (req, res) => {
+  try {
+    const { code, data } = req.body;
+    const stock = await db.collection("future").where("code", "==", code).get();
+    console.log(stock.docs[0]);
+    if (!stock.docs[0]) {
+      console.log("here");
+      stock = await db.collection("future").add({ code, data });
+      res.json({ msg: "added" });
+    } else {
+      console.log("enters' this block");
+      const id = stock.docs[0].id;
+      await db.collection("future").doc(id).update({ code, data });
+      res.json({ msg: "updated" });
+    }
+  } catch (error) {
+    res.json(error);
+  }
+};
+
+module.exports = {addFloorsheet, getFLoorsheet, getFundamentals, addFundamentals, getAllFundamentals, addFuture, getFuture}
