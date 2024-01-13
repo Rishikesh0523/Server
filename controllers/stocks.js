@@ -40,7 +40,7 @@ const getFLoorsheet = async(req, res)=>{
     }
 }
 
-const getFundamenatals=async(req,res)=>{
+const getFundamentals=async(req,res)=>{
     try{
     const {code} = req.params
     let data = await scrapeInfo(code);
@@ -55,4 +55,45 @@ const getFundamenatals=async(req,res)=>{
     }
 }
 
-module.exports = {addFloorsheet, getFLoorsheet, getFundamenatals}
+const addFundamentals = async (req, res) => {
+  try {
+    const { code, fundamentals } = req.body;
+    const stock = await db
+      .collection("fundamentals")
+      .where("code", "==", code)
+      .get();
+    console.log(stock.docs[0]);
+    if (!stock.docs[0]) {
+      console.log("here");
+      stock = await db.collection("fundamentals").add({ code, fundamentals });
+      res.json({ msg: "added" });
+    } else {
+      console.log("enters' this block");
+      const id = stock.docs[0].id;
+      await db.collection("fundamentals").doc(id).update({ code, fundamentals });
+      res.json({ msg: "updated" });
+    }
+  } catch (error) {
+    res.json(error);
+  }
+};
+
+const getAllFundamentals = async (req, res) => {
+  try {
+    const stock = await db.collection("fundamentals").get();
+    console.log(stock.docs);
+    if (!stock.docs[0]) {
+      console.log("here");
+    
+      res.json({ msg: "collection empty" });
+    } else {
+      console.log("enters' this block");
+      const data = stock.docs.map(el=>el.data())
+      res.json({ msg: "updated", data });
+    }
+  } catch (error) {
+    res.json(error);
+  }
+};
+
+module.exports = {addFloorsheet, getFLoorsheet, getFundamentals, addFundamentals, getAllFundamentals}
